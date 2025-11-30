@@ -1,0 +1,77 @@
+<div class="book-summary">
+    <nav role="navigation">
+        <div id="book-search-input" role="search">
+            <input type="text" placeholder="Type to search" />
+        </div>
+        <div id="book-search-input-link" role="search">
+            <a href="{{site.baseurl}}/assets/search.html">Click to Search</a>
+        </div>
+        <ul class="summary">
+            {% if page.url == "/index.html" or page.url == "/" %}
+            <li class="chapter active" data-level="1.1" data-path="{{site.baseurl}}">
+            {% else %}
+            <li class="chapter" data-level="1.1" data-path="{{site.baseurl}}">
+            {% endif %}
+                <a href="{{site.baseurl}}/">
+                    {{ site.title | escape }}
+                </a>
+            </li>
+
+            <li class="divider"></li>
+
+            {% for collection in site.ordered_collections %}
+                {% assign items = site[collection] | sort: 'date' | reverse %}
+                {% assign has_active_item = false %}
+                
+                {% comment %} 从 index.md 获取 collection 的标题 {% endcomment %}
+                {% assign collection_name = collection | capitalize %}
+                {% for item in items %}
+                    {% if item.path contains 'index.md' or item.url contains '/index/' %}
+                        {% assign collection_name = item.title %}
+                        {% break %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% comment %} 检查当前页面是否属于这个 collection {% endcomment %}
+                {% if page.collection == collection %}
+                    {% assign has_active_item = true %}
+                {% else %}
+                    {% for item in items %}
+                        {% if page.url == item.url %}
+                            {% assign has_active_item = true %}
+                            {% break %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
+                {% if forloop.first != true %}
+                    <li class="divider"></li>
+                {% endif %}
+                
+                {% comment %} 创建可折叠的分组，只有包含当前页面的分组才展开 {% endcomment %}
+                {% if has_active_item %}
+                <li class="chapter expanded" data-level="1.{{ forloop.index }}" data-path="{{site.baseurl}}/{{collection}}/">
+                {% else %}
+                <li class="chapter" data-level="1.{{ forloop.index }}" data-path="{{site.baseurl}}/{{collection}}/">
+                {% endif %}
+                    <a href="javascript:void(0);" style="cursor: pointer;">{{ collection_name }}</a>
+                    <ul>
+                        {% for item in items %}
+                            {% unless item.hidden %}
+                                {% if page.url == item.url %}
+                                <li class="chapter active" data-level="1.{{ forloop.parentloop.index }}.{{ forloop.index }}" data-path="{{site.baseurl}}{{item.url}}">
+                                {% else %}
+                                <li class="chapter" data-level="1.{{ forloop.parentloop.index }}.{{ forloop.index }}" data-path="{{site.baseurl}}{{item.url}}">
+                                {% endif %}
+                                    <a href="{{site.baseurl}}{{item.url}}">
+                                        {{ item.title | escape }}
+                                    </a>
+                                </li>
+                            {% endunless %}
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</div>
